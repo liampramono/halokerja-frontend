@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import moment from 'moment';
@@ -13,6 +13,8 @@ import {
   Button,
   LinearProgress
 } from '@material-ui/core';
+import { AuthContext } from "../../../../App";
+// import { AccountContext } from "../../Account";
 
 const useStyles = makeStyles(theme => ({
   root: {},
@@ -35,15 +37,19 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const AccountProfile = props => {
+  const { state: authState } = useContext(AuthContext);
+  const { user } = authState;
   const { className, ...rest } = props;
 
   const classes = useStyles();
 
-  const user = {
+  console.log("authState", authState)
+
+  const users = {
     name: 'Shen Zhi',
     city: 'Los Angeles',
     country: 'USA',
-    timezone: 'GTM-7',
+    timezone: 'GMT+7',
     avatar: '/images/avatars/avatar_11.png'
   };
 
@@ -59,26 +65,25 @@ const AccountProfile = props => {
               gutterBottom
               variant="h2"
             >
-              John Doe
-            </Typography>
+              {user.firstName + ' ' + user.lastName}            </Typography>
             <Typography
               className={classes.locationText}
               color="textSecondary"
               variant="body1"
             >
-              {user.city}, {user.country}
+              {users.city}, {users.country}
             </Typography>
             <Typography
               className={classes.dateText}
               color="textSecondary"
               variant="body1"
             >
-              {moment().format('hh:mm A')} ({user.timezone})
+              {moment().format('hh:mm A')} ({users.timezone})
             </Typography>
           </div>
           <Avatar
             className={classes.avatar}
-            src={user.avatar}
+            src={users.avatar}
           />
         </div>
         <div className={classes.progress}>

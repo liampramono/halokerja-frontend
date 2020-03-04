@@ -27,13 +27,12 @@ const Footer = props => {
           href="https://devias.io/"
           target="_blank"
         >
-          Devias IO
+          Halo Kerja
         </Link>
         . 2019
       </Typography>
       <Typography variant="caption">
-        Created with love for the environment. By designers and developers who
-        love to work together in offices!
+        Halo kerja membantu kandidat mendapatkan pekerjaan yang mereka inginkan
       </Typography>
     </div>
   );

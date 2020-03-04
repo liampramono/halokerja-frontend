@@ -14,6 +14,7 @@ import {
   Settings as SettingsView,
   SignUp as SignUpView,
   SignIn as SignInView,
+  Skill as SkillView, 
   NotFound as NotFoundView
 } from './views';
 
@@ -66,6 +67,12 @@ const Routes = () => {
         exact
         layout={MainLayout}
         path="/settings"
+      />
+      <RouteWithLayout
+        component={SkillView}
+        exact
+        layout={MainLayout}
+        path="/skills"
       />
       <RouteWithLayout
         component={SignUpView}

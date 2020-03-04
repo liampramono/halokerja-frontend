@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/styles';
@@ -12,23 +12,34 @@ import {
   Button,
   TextField
 } from '@material-ui/core';
+import { AuthContext } from "../../../../App";
 
 const useStyles = makeStyles(() => ({
   root: {}
 }));
 
 const AccountDetails = props => {
+  const { state: authState, dispatch } = useContext(AuthContext);
   const { className, ...rest } = props;
 
+  const { user } = authState;
+
+  console.log("user ******", authState)
   const classes = useStyles();
 
+  const validateNotNull = (property) => {
+    if (property === null)
+      return ""
+    return property;
+  };
+
   const [values, setValues] = useState({
-    firstName: 'Shen',
-    lastName: 'Zhi',
-    email: 'shen.zhi@devias.io',
-    phone: '',
-    state: 'Alabama',
-    country: 'USA'
+    firstName: validateNotNull(user.firstName),
+    lastName: validateNotNull(user.lastName),
+    email: validateNotNull(user.email),
+    phoneNumber: validateNotNull(user.phoneNumber),
+    state: validateNotNull(user.state),
+    country: validateNotNull(user.country)
   });
 
   const handleChange = event => {
@@ -36,7 +47,39 @@ const AccountDetails = props => {
       ...values,
       [event.target.name]: event.target.value
     });
+    console.log(values.firstName)
   };
+
+  const handleUpdate = event => {
+    event.preventDefault();
+
+    // console.log("values name", values.firstName)
+    fetch(`http://localhost:9000/api/users/user/${user.id}`, {
+      method: "put",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        userId: user.id,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        phoneNumber: values.phoneNumber, 
+        country: values.country,
+      })
+    })
+      .then(res => {
+        if(res.ok) {
+          res.json()
+          .then((resJson) => {
+            console.log("editing resjson", resJson)  
+            dispatch({
+              type: "UPDATE_USER",
+              payload: resJson
+            })
+          })
+        }
+      })
+  }
 
   const states = [
     {
@@ -52,6 +95,12 @@ const AccountDetails = props => {
       label: 'San Francisco'
     }
   ];
+
+
+   //remove this
+  // if (!authState.isAuthenticated) {
+  //   return null
+  // }
 
   return (
     <Card
@@ -133,7 +182,7 @@ const AccountDetails = props => {
                 name="phone"
                 onChange={handleChange}
                 type="number"
-                value={values.phone}
+                value={values.phoneNumber}
                 variant="outlined"
               />
             </Grid>
@@ -188,6 +237,7 @@ const AccountDetails = props => {
           <Button
             color="primary"
             variant="contained"
+            onClick={handleUpdate}
           >
             Save details
           </Button>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Link as RouterLink, withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import validate from 'validate.js';
@@ -12,6 +12,7 @@ import {
   Typography
 } from '@material-ui/core';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import { AuthContext } from "../../App";
 
 import { Facebook as FacebookIcon, Google as GoogleIcon } from 'icons';
 
@@ -126,6 +127,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const SignIn = props => {
+  const { state: authState, dispatch } = useContext(AuthContext);
   const { history } = props;
 
   const classes = useStyles();
@@ -168,15 +170,70 @@ const SignIn = props => {
         [event.target.name]: true
       }
     }));
+
+    console.log("Form state")
+    console.log(formState);
   };
 
   const handleSignIn = event => {
     event.preventDefault();
-    history.push('/');
+    setFormState(formState => ({
+      ...formState,
+      values: {
+        ...formState.values,
+        [event.target.name]:
+          event.target.type === 'checkbox'
+            ? event.target.checked
+            : event.target.value
+      },
+      touched: {
+        ...formState.touched,
+        [event.target.name]: true
+      }
+    }));
+
+    fetch("http://localhost:9000/api/users/login", {
+      method: "post",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email: formState.values.email,
+        password: formState.values.password
+      })
+    })
+      .then(res => {
+        console.log(`this is the response ${res}`)
+        console.dir(res)
+        console.dir(res.body)
+        if (res.ok) {
+          // console.log(res.json)
+          // return res.json
+          res.json().then((resJson) => {
+            console.log(resJson);
+            dispatch({
+              type: "LOGIN",
+              payload: resJson
+            })
+          })
+        }
+      })
+      .catch(err => {
+        console.log(`this is the error ${err}`)
+      })
+
+    console.log(`Form state ${formState}`)
+
+    // history.push('/');
   };
 
   const hasError = field =>
     formState.touched[field] && formState.errors[field] ? true : false;
+
+  if (authState.isAuthenticated) {
+    history.push('/account');
+    return null;
+  }
 
   return (
     <div className={classes.root}>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Link as RouterLink, withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import validate from 'validate.js';
@@ -14,6 +14,7 @@ import {
   Typography
 } from '@material-ui/core';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import { AuthContext } from "../../App";
 
 const schema = {
   firstName: {
@@ -141,6 +142,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const SignUp = props => {
+  const { state: authState, dispatch } = useContext(AuthContext);
   const { history } = props;
 
   const classes = useStyles();
@@ -187,7 +189,37 @@ const SignUp = props => {
 
   const handleSignUp = event => {
     event.preventDefault();
-    history.push('/');
+    // history.push('/');
+
+    fetch("http://localhost:9000/api/users/register", {
+      method: "post",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email: formState.values.email,
+        firstName: formState.values.firstName,
+        lastName: formState.values.lastName, 
+        password: formState.values.password
+      })
+    })
+      .then(res => {
+        console.log(`this is the response ${res}`);
+        if(res.ok) {
+          res.json().then((resJson) => {
+            console.log(resJson);
+            dispatch({
+              type: "REGISTER",
+              payload: resJson
+            })
+            history.push('/sign-in');
+          })
+        }
+      })
+      .catch(err => {
+        //need to catch the error
+        console.log(`this is the error ${err}`)
+      })
   };
 
   const hasError = field =>
